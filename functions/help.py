@@ -24,10 +24,10 @@ class CustomHelpCommand(commands.HelpCommand):
         await channel.send(embed=embed)
 
     async def send_command_help(self, command):
-        pass  # Do nothing
+        pass
 
     async def send_error_message(self, error):
-        pass  # Do nothing
+        pass
 
 def setup_help_command(bot):
     bot.help_command = CustomHelpCommand()
