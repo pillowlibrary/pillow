@@ -28,6 +28,6 @@ async def update_command(ctx, *, files=None):
     if files:
         files_list = files.split(',')
         set_update_flag(files_list)
-        await ctx.send(f"Bot will update the following files on the next run: {', '.join(files_list)}")
+        await ctx.send(f"✅ **Bot will update the following files on the next run:** `{', '.join(files_list)}`")
     else:
-        await ctx.send("Please provide the list of files to update.")
+        await ctx.send("**Please provide the list of files to update (e.g. delete.py,screenshot.py).**")
