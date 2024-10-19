@@ -1,14 +1,32 @@
 import os
+import json
 
-def set_update_flag():
-    if not os.path.exists("update_status.txt"):
-        with open("update_status.txt", "w") as f:
-            f.write("update=false")
+UPDATE_STATUS_FILE = "update_status.json"
 
-    with open("update_status.txt", "w") as f:
-        f.write("update=true")
+def ensure_update_file_exists():
+    if not os.path.exists(UPDATE_STATUS_FILE):
+        data = {
+            "update": False,
+            "files_to_update": []
+        }
+        with open(UPDATE_STATUS_FILE, "w") as f:
+            json.dump(data, f)
 
-async def update_command(ctx):
-    set_update_flag()
+def set_update_flag(files):
+    ensure_update_file_exists()
+    
+    data = {
+        "update": True,
+        "files_to_update": files
+    }
+    
+    with open(UPDATE_STATUS_FILE, "w") as f:
+        json.dump(data, f)
 
-    await ctx.send("Bot will check for updates on the next run.")
+async def update_command(ctx, *, files=None):
+    if files:
+        files_list = files.split(',')
+        set_update_flag(files_list)
+        await ctx.send(f"Bot will update the following files on the next run: {', '.join(files_list)}")
+    else:
+        await ctx.send("Please provide the list of files to update.")
