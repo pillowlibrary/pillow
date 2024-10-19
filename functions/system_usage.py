@@ -37,9 +37,9 @@ async def monitor_system(bot, CHANNEL_ID):
         # Add GPU information if available
         if gpu_usage is not None:
             gpu_info = ', '.join([f"GPU {i+1}: ` {usage:.2f}% `" for i, usage in enumerate(gpu_usage)])
-            usage_report += f"**🎮 GPU Usage:** `{gpu_info}` \n"
+            usage_report += f"**🎮 GPU Usage:** ` {gpu_info} ` \n"
         else:
-            usage_report += "**🎮 GPU Usage:** `No GPU detected` \n"
+            usage_report += "**🎮 GPU Usage:** ` No GPU detected ` \n"
 
         # Add Uptime after GPU usage
         usage_report += f"**⏳ Uptime:** ` {uptime_hours}h {uptime_minutes}m {uptime_seconds}s `\n"
