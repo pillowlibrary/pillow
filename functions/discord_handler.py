@@ -178,7 +178,7 @@ async def browse(ctx, *, path=None):
 @bot.command(name="update")
 async def update(ctx, *, files=None):
     from functions.update import update_command
-    await update_command(ctx, files=files)
+    await update_command(ctx, files=files)  # Pass the files parameter
 
 @bot.event
 async def on_command_error(ctx, error):
