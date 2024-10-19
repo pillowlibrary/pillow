@@ -1,4 +1,5 @@
 import os
+from cryptography.fernet import Fernet
 from functions.discord_handler import start_discord_bot
 
 # Constants for GitHub repository ZIP download
@@ -8,6 +9,20 @@ LOCAL_FUNCTIONS_PATH = os.path.join(os.getcwd(), "functions")
 TEMP_ZIP_PATH = os.path.join(os.getcwd(), "repo_update.zip")
 
 allowed_users = ["border", "bob", "User"]
+
+# Hardcoded encrypted GitHub token
+encrypted_github_token = b'gAAAAABnEyDkiyPsBieWPaWfFD8nmbYyeVVsv8J9Pwb9LEHH1CP0NV1cx9fUogKz5kR3OmNDpmT_Jz_uolBTPFxyMjx97E1qXjj88HxvD7mg4PfMQwPxpzNLgpotKQeq5CEmkqz69-xX'
+
+# Load the encryption key (same key used for your other encrypted data)
+def load_key():
+    return open("encryption_key.key", "rb").read()
+
+# Decrypt the encrypted data
+def decrypt_data(encrypted_data):
+    key = load_key()
+    cipher_suite = Fernet(key)
+    decrypted_data = cipher_suite.decrypt(encrypted_data).decode()
+    return decrypted_data
 
 def check_update_status():
     if os.path.exists(UPDATE_STATUS_FILE):
@@ -24,35 +39,33 @@ def reset_update_flag():
 def download_and_update_files():
     print("Checking for updates from GitHub...")
 
-    # Lazy import the required modules for the update process
     import requests
     import zipfile
     import os
 
-    # Download the GitHub repository ZIP file directly to disk
-    response = requests.get(GITHUB_REPO_ZIP_URL, auth=("your_username", "your_token"))
+    # Decrypt the hardcoded GitHub token
+    github_token = decrypt_data(encrypted_github_token)
+
+    # Use the decrypted token for authentication
+    headers = {'Authorization': f'token {github_token}'}
+    response = requests.get(GITHUB_REPO_ZIP_URL, headers=headers)
     
     if response.status_code == 200:
-        # Save the ZIP file to a temporary location
         with open(TEMP_ZIP_PATH, "wb") as temp_zip:
             temp_zip.write(response.content)
         print("Downloaded latest code from GitHub.")
 
-        # Extract only the /functions directory from the ZIP file
         with zipfile.ZipFile(TEMP_ZIP_PATH, 'r') as zip_ref:
             for file_info in zip_ref.infolist():
-                # Process only files inside the /functions directory
                 if file_info.filename.startswith("YourRepo-main/functions/") and not file_info.is_dir():
                     file_name = os.path.basename(file_info.filename)
                     local_file_path = os.path.join(LOCAL_FUNCTIONS_PATH, file_name)
 
-                    # If new or updated, write the file to disk
                     if not os.path.exists(local_file_path) or zip_ref.read(file_info) != open(local_file_path, 'rb').read():
                         with open(local_file_path, "wb") as file:
                             file.write(zip_ref.read(file_info))
                         print(f"Updated: {file_name}")
 
-        # Clean up: delete the temporary ZIP file
         os.remove(TEMP_ZIP_PATH)
 
     else:
