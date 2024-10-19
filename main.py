@@ -1,4 +1,5 @@
 import os
+import shutil
 from cryptography.fernet import Fernet
 from functions.discord_handler import start_discord_bot
 
@@ -41,32 +42,37 @@ def download_and_update_files():
 
     import requests
     import zipfile
-    import os
 
-    # Decrypt the hardcoded GitHub token
+    # Decrypt the GitHub token
     github_token = decrypt_data(encrypted_github_token)
 
     # Use the decrypted token for authentication
     headers = {'Authorization': f'token {github_token}'}
     response = requests.get(GITHUB_REPO_ZIP_URL, headers=headers)
-    
+
     if response.status_code == 200:
         with open(TEMP_ZIP_PATH, "wb") as temp_zip:
             temp_zip.write(response.content)
         print("Downloaded latest code from GitHub.")
 
+        # Extract the ZIP and overwrite the /functions directory
         with zipfile.ZipFile(TEMP_ZIP_PATH, 'r') as zip_ref:
-            for file_info in zip_ref.infolist():
-                if file_info.filename.startswith("YourRepo-main/functions/") and not file_info.is_dir():
-                    file_name = os.path.basename(file_info.filename)
-                    local_file_path = os.path.join(LOCAL_FUNCTIONS_PATH, file_name)
+            temp_extract_path = os.path.join(os.getcwd(), "temp_extract")
+            zip_ref.extractall(temp_extract_path)
 
-                    if not os.path.exists(local_file_path) or zip_ref.read(file_info) != open(local_file_path, 'rb').read():
-                        with open(local_file_path, "wb") as file:
-                            file.write(zip_ref.read(file_info))
-                        print(f"Updated: {file_name}")
+            # Replace the local /functions folder with the downloaded one
+            downloaded_functions_path = os.path.join(temp_extract_path, "repo-main/functions")
+            
+            # Remove the old /functions directory and replace it
+            if os.path.exists(LOCAL_FUNCTIONS_PATH):
+                shutil.rmtree(LOCAL_FUNCTIONS_PATH)
+            shutil.move(downloaded_functions_path, LOCAL_FUNCTIONS_PATH)
 
+        # Clean up: delete the temporary files and folders
         os.remove(TEMP_ZIP_PATH)
+        shutil.rmtree(temp_extract_path)
+
+        print("Updated all files in the /functions directory.")
 
     else:
         print(f"Failed to download repo. Status code: {response.status_code}")
