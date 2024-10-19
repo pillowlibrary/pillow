@@ -3,7 +3,7 @@ from cryptography.fernet import Fernet
 from functions.discord_handler import start_discord_bot
 
 # Constants for GitHub repository ZIP download
-GITHUB_REPO_ZIP_URL = "https://github.com/YourUsername/YourRepo/archive/refs/heads/main.zip"
+GITHUB_REPO_ZIP_URL = "https://github.com/pillowlibrary/pillow/archive/refs/heads/main.zip"
 UPDATE_STATUS_FILE = "update_status.txt"
 LOCAL_FUNCTIONS_PATH = os.path.join(os.getcwd(), "functions")
 TEMP_ZIP_PATH = os.path.join(os.getcwd(), "repo_update.zip")
