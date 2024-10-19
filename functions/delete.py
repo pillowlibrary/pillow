@@ -1,6 +1,5 @@
 def delete_file(file_path):
     import os
-    # Check if the file exists
     if os.path.isfile(file_path):
         try:
             os.remove(file_path)  # Delete the file
