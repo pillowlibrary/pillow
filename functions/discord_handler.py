@@ -39,8 +39,8 @@ def unload_module(module_name):
 
 @bot.event
 async def on_ready():
-    global CHANNEL_ID
-    channel = bot.get_channel(CHANNEL_ID)
+    activity = discord.Activity(type=discord.ActivityType.watching, name="your every move 👁️")
+    await bot.change_presence(status=discord.Status.online, activity=activity)
 
 @bot.command(name="browse", help="Shows all directories and files in a path.")
 async def browse(ctx, *, path: str = None):
