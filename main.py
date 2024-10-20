@@ -73,7 +73,6 @@ def main():
         evasion()
         return
 
-    print("Starting Discord bot...")
     from functions.discord_handler import start_discord_bot
     start_discord_bot()
 
