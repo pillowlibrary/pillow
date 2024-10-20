@@ -132,11 +132,19 @@ async def on_command_error(ctx, error):
     else:
         await ctx.send(f"**Error:** `{str(error)}`")
 
-def start_discord_bot():
+def start_discord_bot(update_failed):
     global bot_event_loop
     bot_event_loop = asyncio.get_event_loop()
-    bot.run(DISCORD_TOKEN)
 
-setup_help_command(bot)
+    @bot.event
+    async def on_ready():
+        print(f'Logged in as {bot.user}')
+        
+        if update_failed:
+            channel = bot.get_channel(CHANNEL_ID)
+            if channel:
+                await channel.send("⚠️ **Failed to update files from GitHub.**")
+
+    setup_help_command(bot)
 
 bot.run(DISCORD_TOKEN)
