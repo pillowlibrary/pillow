@@ -61,7 +61,7 @@ async def send_large_file(bot, CHANNEL_ID, file_path):
             return
         await channel.send(f"**⚠️ File is a directory or exceeds Discord's limit, uploading to file.io**")
         link = upload_to_file_io(file_path)
-        await channel.send(f"Download: {link}")
+        await channel.send(f"**Download:** {link}")
         if file_path.endswith(".zip"):
             os.remove(file_path)
     except Exception as e:
