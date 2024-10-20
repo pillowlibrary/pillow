@@ -109,13 +109,6 @@ async def inputs(ctx):
     except Exception as e:
         await ctx.send(f"Error: {str(e)}")
 
-@bot.command(name="installation", help="Shows installation details and installed functions.")
-async def installation(ctx):
-    installation_module = lazy_load_module("functions.installation")
-    await installation_module.installation(ctx, bot)
-    unload_module("functions.installation")
-
-
 @bot.command(name="screenshot", help="Takes a screenshot of the user's screen(s).")
 async def screenshot(ctx):
     category = "screenshot"
