@@ -2,7 +2,6 @@ import os
 import json
 import re
 
-# Move one directory up from the current folder (functions) to place the file in the main directory
 UPDATE_STATUS_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "update_status.json")
 
 def ensure_update_file_exists():
