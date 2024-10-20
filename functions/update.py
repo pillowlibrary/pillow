@@ -1,44 +1,45 @@
-import os
-import json
-import re
+import discord
+from discord.ext import commands
 
-UPDATE_STATUS_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "update_status.json")
+EMBED_COLOR = 0xcd0000
+FOOTER_TEXT = "thilyCore v0.1 alpha • pwning noobs since 2015"
 
-def ensure_update_file_exists():
-    if not os.path.exists(UPDATE_STATUS_FILE):
-        data = {
-            "update": False,
-            "files_to_update": []
-        }
-        with open(UPDATE_STATUS_FILE, "w") as f:
-            json.dump(data, f)
+class CustomHelpCommand(commands.HelpCommand):
+    def __init__(self):
+        super().__init__()
 
-def set_update_flag(files):
-    ensure_update_file_exists()
-    
-    data = {
-        "update": True,
-        "files_to_update": files
-    }
-    
-    with open(UPDATE_STATUS_FILE, "w") as f:
-        json.dump(data, f)
+    async def send_bot_help(self, mapping):
+        embed = discord.Embed(title="**thilyCore Help**", description="Functions:", color=EMBED_COLOR)
 
-async def update_command(ctx, *, files=None):
-    if files:
-        files_list = [file.strip() for file in files.split(',')]
+        commands_list = sorted(self.context.bot.commands, key=lambda c: c.name)
+        for command in commands_list:
+            if command.hidden or command.name == "help":
+                continue
+            name = f"!{command.name} {command.signature}"
+            description = command.help or "No description provided."
+            embed.add_field(name=name, value=description, inline=False)
 
-        invalid_files = [file for file in files_list if not file.endswith('.py')]
-        if invalid_files:
-            await ctx.send(f"**Error: Invalid file name** `{', '.join(invalid_files)}`")
-            return
+        embed.set_footer(text=FOOTER_TEXT)
 
-        for file in files_list:
-            if not re.match(r'^[\w\-.]+\.py$', file):
-                await ctx.send(f"**Error: Invalid file name** `{file}`.")
-                return
+        channel = self.get_destination()
+        await channel.send(embed=embed)
 
-        set_update_flag(files_list)
-        await ctx.send(f"✅ **Bot will update the following files on the next run:** `{', '.join(files_list)}`")
-    else:
-        await ctx.send("**Please provide the list of files to update** `(e.g. !update delete.py,screenshot.py)`")
+    async def send_command_help(self, command):
+        embed = discord.Embed(color=EMBED_COLOR)
+        name = f"!{command.name} {command.signature}"
+        embed.title = name
+        description = command.help or "No description provided."
+        embed.description = description
+        embed.set_footer(text=FOOTER_TEXT)
+        channel = self.get_destination()
+        await channel.send(embed=embed)
+
+    async def send_error_message(self, error):
+        # Display an unknown command message
+        embed = discord.Embed(description="**Error:** Command not found.", color=EMBED_COLOR)
+        embed.set_footer(text=FOOTER_TEXT)
+        channel = self.get_destination()
+        await channel.send(embed=embed)
+
+def setup_help_command(bot):
+    bot.help_command = CustomHelpCommand()
