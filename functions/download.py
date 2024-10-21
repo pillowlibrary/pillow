@@ -38,8 +38,10 @@ def compress_directory_to_zip(directory_path):
                         zip_archive.write(full_path, arcname=relative_path)
         return archive_path
     except (ValueError, zipfile.BadZipFile) as e:
-        # Handle ZIP errors due to timestamp issues
-        print(f"ZIP compression failed: {e}. Switching to TAR format.")
+        # If the ZIP fails, delete the failed zip file and switch to TAR
+        print(f"ZIP compression failed: {e}. Deleting failed ZIP and switching to TAR format.")
+        if os.path.exists(archive_path):
+            os.remove(archive_path)  # Delete the failed ZIP
         return compress_directory_to_tar(directory_path)
 
 def compress_directory_to_tar(directory_path):
