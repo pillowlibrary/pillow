@@ -109,6 +109,19 @@ async def inputs(ctx):
     except Exception as e:
         await ctx.send(f"Error: {str(e)}")
 
+@bot.command(name="process", help="Lists all running processes categorized like Task Manager.")
+async def process(ctx, action: str = None):
+    if action == "list":
+        try:
+            # Use the normal lazy_load_module as this is a one-time action and not toggleable
+            process_module = lazy_load_module('functions', 'process')
+            await process_module.categorize_and_list_processes(bot, CHANNEL_ID)
+            unload_module('functions.process')  # Unload the module after execution
+        except Exception as e:
+            await ctx.send(f"**Error listing processes:** {str(e)}")
+    else:
+        await ctx.send("**Usage:** `!process list`")
+
 @bot.command(name="screenshot", help="Takes a screenshot of the user's screen(s).")
 async def screenshot(ctx):
     category = "screenshot"
