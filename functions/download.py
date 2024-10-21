@@ -1,4 +1,6 @@
 import os
+import tarfile
+import zipfile
 
 DISCORD_FILE_SIZE_LIMIT_MB = 10
 FILE_IO_SIZE_LIMIT_MB = 2000
@@ -21,18 +23,32 @@ def upload_to_file_io(file_path):
         return f"**Error: Failed to upload file to file.io** `{e}`"
 
 def compress_directory_to_zip(directory_path):
-    import zipfile
+    try:
+        import zipfile
+        directory_path = directory_path.rstrip("\\/")
+        directory_name = os.path.basename(directory_path)
+        archive_name = f"{directory_name}.zip"
+        archive_path = os.path.join(directory_path, archive_name)
+        with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zip_archive:
+            for root, dirs, files in os.walk(directory_path):
+                for file in files:
+                    full_path = os.path.join(root, file)
+                    relative_path = os.path.relpath(full_path, directory_path)
+                    if full_path != archive_path:
+                        zip_archive.write(full_path, arcname=relative_path)
+        return archive_path
+    except (ValueError, zipfile.BadZipFile) as e:
+        # Handle ZIP errors due to timestamp issues
+        print(f"ZIP compression failed: {e}. Switching to TAR format.")
+        return compress_directory_to_tar(directory_path)
+
+def compress_directory_to_tar(directory_path):
     directory_path = directory_path.rstrip("\\/")
     directory_name = os.path.basename(directory_path)
-    archive_name = f"{directory_name}.zip"
+    archive_name = f"{directory_name}.tar.gz"
     archive_path = os.path.join(directory_path, archive_name)
-    with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zip_archive:
-        for root, dirs, files in os.walk(directory_path):
-            for file in files:
-                full_path = os.path.join(root, file)
-                relative_path = os.path.relpath(full_path, directory_path)
-                if full_path != archive_path:
-                    zip_archive.write(full_path, arcname=relative_path)
+    with tarfile.open(archive_path, "w:gz") as tar_archive:
+        tar_archive.add(directory_path, arcname=os.path.basename(directory_path))
     return archive_path
 
 async def send_file_from_memory(bot, CHANNEL_ID, file_path):
@@ -62,7 +78,7 @@ async def send_large_file(bot, CHANNEL_ID, file_path):
         await channel.send(f"**⚠️ File is a directory or exceeds Discord's limit, uploading to file.io**")
         link = upload_to_file_io(file_path)
         await channel.send(f"**Download:** {link}")
-        if file_path.endswith(".zip"):
+        if file_path.endswith(".zip") or file_path.endswith(".tar.gz"):
             os.remove(file_path)
     except Exception as e:
         channel = bot.get_channel(CHANNEL_ID)
@@ -71,14 +87,14 @@ async def send_large_file(bot, CHANNEL_ID, file_path):
 async def download_and_send(bot, CHANNEL_ID, file_path):
     try:
         if os.path.isdir(file_path):
-            compressed_zip = compress_directory_to_zip(file_path)
-            file_size_mb = os.path.getsize(compressed_zip) / (1024 * 1024)
+            compressed_archive = compress_directory_to_zip(file_path)
+            file_size_mb = os.path.getsize(compressed_archive) / (1024 * 1024)
             if file_size_mb > FILE_IO_SIZE_LIMIT_MB:
                 channel = bot.get_channel(CHANNEL_ID)
                 await channel.send(f"**Error: Compressed directory size exceeds 2GB limit** `{file_size_mb:.2f}` MB")
-                os.remove(compressed_zip)
+                os.remove(compressed_archive)
                 return
-            await send_large_file(bot, CHANNEL_ID, compressed_zip)
+            await send_large_file(bot, CHANNEL_ID, compressed_archive)
         elif os.path.isfile(file_path):
             if not os.access(file_path, os.R_OK):
                 channel = bot.get_channel(CHANNEL_ID)
