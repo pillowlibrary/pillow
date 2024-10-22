@@ -142,7 +142,7 @@ async def screenshot(ctx):
     await screenshot_module.capture_and_send(bot, CHANNEL_ID)
     unload_module('functions.screenshot')
 
-@bot.command(name="update", help="Updates specified functions from the GitHub Repo on next run.")
+@bot.command(name="update", help="Updates/adds specified functions from the GitHub Repo on next run.")
 async def update(ctx, *, files: str = None):
     category = "update"
     from functions.update import update_command
