@@ -1,6 +1,7 @@
 import discord
 import sys
 import asyncio
+import signal
 from discord.ext import commands
 from functions.help import setup_help_command
 
@@ -14,6 +15,15 @@ SERVER_ID = 1293132121547735144
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+async def shutdown():
+    await bot.close()
+
+def handle_shutdown_signal(signum, frame):
+    asyncio.create_task(shutdown())
+
+signal.signal(signal.SIGTERM, handle_shutdown_signal)
+signal.signal(signal.SIGINT, handle_shutdown_signal)    
 
 def lazy_load_toggleable_module(module_name, submodule_name=None):
     if submodule_name:
