@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 
 EMBED_COLOR = 0xcd0000
-FOOTER_TEXT = "thilyCore v0.1 alpha • pwning noobs since 2015"
+FOOTER_TEXT = "thilyCore v1.0 beta • pwning noobs since 2015"
 
 class CustomHelpCommand(commands.HelpCommand):
     def __init__(self):
@@ -35,7 +35,6 @@ class CustomHelpCommand(commands.HelpCommand):
         await channel.send(embed=embed)
 
     async def send_error_message(self, error):
-        # Display an unknown command message
         embed = discord.Embed(description="**Error:** Command not found.", color=EMBED_COLOR)
         embed.set_footer(text=FOOTER_TEXT)
         channel = self.get_destination()
