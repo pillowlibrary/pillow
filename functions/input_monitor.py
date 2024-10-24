@@ -24,6 +24,7 @@ def log_input_event(key):
             Key.alt_r: '[ALT]',
             Key.ctrl_l: '[CTRL]',
             Key.ctrl_r: '[CTRL]',
+            Key.cmd: '[WIN]',
             Key.right: '[→]',
             Key.left: '[←]',
             Key.up: '[↑]',
