@@ -1,0 +1,8 @@
+requests
+pyperclip
+pynput
+Pillow
+psutil
+discord.py
+GPUtil
+pygetwindow
