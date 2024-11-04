@@ -11,7 +11,7 @@ UPDATE_STATUS_FILE = os.path.join(os.path.dirname(__file__), "update_status.json
 LOCAL_FUNCTIONS_PATH = os.path.join(os.getcwd(), "functions")
 DISCORD_HANDLER_FILE = "discord_handler.py"
 allowed_users = ["border", "bob", "User", "Administrator"]
-github_token = "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"
+github_token = "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"
 REQUEST_TIMEOUT = 5
 
 def graceful_exit(signum, frame):
