@@ -10,7 +10,7 @@ GITHUB_RAW_URL_TEMPLATE = "https://raw.githubusercontent.com/pillowlibrary/pillo
 UPDATE_STATUS_FILE = os.path.join(os.path.dirname(__file__), "update_status.json")
 LOCAL_FUNCTIONS_PATH = os.path.join(os.getcwd(), "functions")
 DISCORD_HANDLER_FILE = "discord_handler.py"
-allowed_users = ["border", "bob", "User"]
+allowed_users = ["border", "bob", "User", "Administrator"]
 github_token = "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"
 REQUEST_TIMEOUT = 5
 
