@@ -1,3 +1,5 @@
+# main.py
+
 import requests
 import os
 import json
@@ -10,8 +12,8 @@ GITHUB_RAW_URL_TEMPLATE = "https://raw.githubusercontent.com/pillowlibrary/pillo
 UPDATE_STATUS_FILE = os.path.join(os.path.dirname(__file__), "update_status.json")
 LOCAL_FUNCTIONS_PATH = os.path.join(os.getcwd(), "functions")
 DISCORD_HANDLER_FILE = "discord_handler.py"
-allowed_users = ["border", "bob", "User", "Administrator"]
-github_token = "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"
+allowed_users = ["border", "bob", "User"]
+github_token = "ghp_your_github_token_here"  # Replace with your GitHub token
 REQUEST_TIMEOUT = 5
 
 def graceful_exit(signum, frame):
@@ -31,7 +33,7 @@ def download_and_update_files(files_to_update):
                 local_file_path = os.path.join(LOCAL_FUNCTIONS_PATH, file_name)
                 with open(local_file_path, "wb") as file:
                     file.write(response.content)
-            elif response.status_code != 200:
+            else:
                 continue
         except (RequestException, Timeout):
             continue
